@@ -1,20 +1,20 @@
 from datetime import datetime
 import pandas
 from airflow import DAG
-from airflow.operators.empty.EmptyOperator import EmptyOperator
-from airflow.operators.python.PythonOperator import PythonOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 def insert_data(table_name):
     df = pandas.read_csv(f'/opt/airflow/plugins/project_csv/{table_name}.csv', delimiter=';')
-    postgres_hook = PostgresHook('postgres_db')
+    postgres_hook = PostgresHook(postgres_conn_id = 'postgres_db')
     engine = postgres_hook.get_sqlalchemy_engine()
     df.to_sql(table_name, engine, schema = 'DS', if_exists = 'append', index = False)
 
 default_args = {
     'owner' : 'daniil',
-    'start_date' : datetime(2024, 12, 30),
+    'start_date' : datetime(2025, 1, 1),
     'retries' : 2
 }
 
@@ -32,7 +32,7 @@ with DAG(
 
     create_schema = SQLExecuteQueryOperator(
         task_id='create_schema',
-        postgres_conn_id='postgres_db',
+        conn_id='postgres_db',
         sql='/opt/airflow/scripts/create_schema.sql',
         autocommit=True
     )
