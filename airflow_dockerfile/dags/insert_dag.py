@@ -1,10 +1,16 @@
 from datetime import datetime
 import pandas
+
 from airflow import DAG
+
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.models import Variable
+from airflow.configuration import conf
+
+path = Variable.get('create_schema', default_var='/opt/airflow/scripts/')
 
 def insert_data(table_name):
     df = pandas.read_csv(f'/opt/airflow/plugins/project_csv/{table_name}.csv', delimiter=';')
@@ -23,7 +29,8 @@ with DAG(
     default_args = default_args,
     description = 'Loading data to DS',
     catchup = False,
-    schedule = '0 0 * * *'
+    schedule = '0 0 * * *',
+    template_searchpath = path
  ) as dag:
 
     start = EmptyOperator(

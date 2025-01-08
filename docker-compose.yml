@@ -63,7 +63,7 @@ services:
     container_name: af-webserver
     environment:
       *airflow-common-env
-    command: webserver
+    command: airflow webserver
     ports:
       - "8080:8080"
     restart: always
@@ -76,7 +76,7 @@ services:
     container_name: af-scheduler
     environment:
       *airflow-common-env
-    command: scheduler
+    command: airflow scheduler
     restart: always
 
   af-worker:
@@ -87,7 +87,7 @@ services:
     container_name: af-worker
     environment:
       *airflow-common-env
-    command: version
+    command: airflow celery worker
     restart: always
 
   airflow-init:
@@ -96,7 +96,7 @@ services:
       context: ./airflow_dockerfile
       dockerfile: dockerfile
     container_name: airflow-init
-    command: version
+    command: db init
     restart: always
     environment:
       <<: *airflow-common-env
